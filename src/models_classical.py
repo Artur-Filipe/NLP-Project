@@ -177,16 +177,7 @@ if __name__ == "__main__":
     )
 
     # 4. Phase 4.2.1: Ablation with Data Augmentation
-    print("\nAugmenting training set with minority synonym replacement...")
-    X_train_aug = augment_minority_classes_synonym(X_train, label_col="label", text_col="text_all", n_augments=2)
-    results_svc_aug = train_evaluate_linearsvc(
-        X_train_aug, X_train_aug["label"], X_val, y_val, label_encoder,
-        text_col="text_classical",
-        model_name="Model B: LinearSVC (With Synonym Augmentation)"
-    )
-
-    # 5. Phase 4.2.1: Ablation - LinearSVC with Synonym Augmentation
-    print("\nApplying synonym augmentation to minority classes for ablation...")
+    print("\nAugmenting training set with minority synonym replacement for ablation...")
     X_train_aug = augment_minority_classes_synonym(X_train, label_col="label", text_col="text_all", n_augments=2)
     results_svc_aug = train_evaluate_linearsvc(
         X_train_aug, X_train_aug["label"], X_val, y_val, label_encoder,
