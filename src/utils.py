@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import torch
 from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
 
 # Global default seed
 SEED = 42
@@ -90,8 +91,6 @@ def load_data(data_dir="StudentsPack"):
     return train_df, test_df
 
 
-
-
 def encode_labels(train_df):
     """
     Fit a LabelEncoder on medical_specialty and add a 'label' column.
@@ -110,6 +109,32 @@ def encode_labels(train_df):
     return train_df, label_encoder
 
 
+def create_train_val_split(train_df, target_col="label", test_size=0.2, seed=SEED):
+    """
+    Creates a stratified train/validation split ensuring all classes
+    (including minority classes like Dermatology) have proportional representation.
+    
+    Args:
+        train_df (pd.DataFrame): Cleaned and encoded training DataFrame.
+        target_col (str): Column name containing the target classes/labels.
+        test_size (float): Proportion of the validation set (default: 0.2 for an 80/20 split).
+        seed (int): Random seed for reproducibility.
+    Returns:
+        X_train, X_val, y_train, y_val: Stratified train/val splits.
+    """
+
+    if target_col not in train_df.columns:
+        raise KeyError(f"Target column '{target_col}' not found. Did you call encode_labels()?")
+    X_train, X_val, y_train, y_val = train_test_split(
+        train_df,
+        train_df[target_col],
+        test_size=test_size,
+        random_state=seed,
+        stratify=train_df[target_col],
+    )
+    return X_train, X_val, y_train, y_val
+
+
 if __name__ == "__main__":
     # Test script execution
     # Ensure reproducible testing
@@ -124,3 +149,9 @@ if __name__ == "__main__":
     train_df, le = encode_labels(train_df)
     print(f"Number of classes: {len(le.classes_)}")
     print("Classes:", le.classes_)
+
+    # Test the split
+    X_train, X_val, y_train, y_val = create_train_val_split(train_df)
+    print(f"\nTrain split size: {len(X_train)} (~80%)")
+    print(f"Val split size:   {len(X_val)} (~20%)")
+    print("Validation label distribution:\n", y_val.value_counts().sort_index())
